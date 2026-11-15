@@ -683,7 +683,8 @@ def emit_can_header(idl: Dict[str, Any]) -> str:
     out.append(f"inline constexpr std::size_t kSignalCount = {len(idl['signals'])};\n\n")
     out.append("const SignalMeta& signal_meta(SignalId id);\n")
     out.append("const SignalMeta* find_signal(std::string_view name);\n")
-    out.append("const char* signal_name(SignalId id);\n\n")
+    out.append("const char* signal_name(SignalId id);\n")
+    out.append("const char* signal_value_name(SignalId id, int value);\n\n")
     out.append("}  // namespace cabin::signals\n")
     return "".join(out)
 
@@ -693,6 +694,7 @@ def emit_can_cpp(idl: Dict[str, Any]) -> str:
         HEADER,
         '#include "cabin_can_map.hpp"\n\n',
         "#include <array>\n#include <cstring>\n\n",
+        '#include "cabin_types.hpp"\n\n',
         "namespace cabin::signals {\nnamespace {\n\n",
         "constexpr std::array<SignalMeta, kSignalCount> kSignalTable = {{\n",
     ]
@@ -728,6 +730,16 @@ def emit_can_cpp(idl: Dict[str, Any]) -> str:
     out.append("  for (const auto& meta : kSignalTable) {\n")
     out.append("    if (name == meta.name) return &meta;\n  }\n  return nullptr;\n}\n\n")
     out.append("const char* signal_name(SignalId id) { return signal_meta(id).name; }\n\n")
+    out.append("const char* signal_value_name(SignalId id, int value) {\n")
+    out.append("  switch (id) {\n")
+    for signal in idl["signals"]:
+        if not signal["type"].startswith("enum:"):
+            continue
+        enum_name = signal["type"].split(":", 1)[1]
+        out.append(f"    case SignalId::k{camel(signal['name'])}:\n")
+        out.append(f"      return gen::to_string(static_cast<gen::{enum_name}>(value));\n")
+    out.append("    default: return \"\";\n")
+    out.append("  }\n}\n\n")
     out.append("}  // namespace cabin::signals\n")
     return "".join(out)
 

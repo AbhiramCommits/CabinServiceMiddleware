@@ -46,5 +46,6 @@ inline constexpr std::size_t kSignalCount = 8;
 const SignalMeta& signal_meta(SignalId id);
 const SignalMeta* find_signal(std::string_view name);
 const char* signal_name(SignalId id);
+const char* signal_value_name(SignalId id, int value);
 
 }  // namespace cabin::signals

@@ -4,6 +4,8 @@
 #include <array>
 #include <cstring>
 
+#include "cabin_types.hpp"
+
 namespace cabin::signals {
 namespace {
 
@@ -34,5 +36,17 @@ const SignalMeta* find_signal(std::string_view name) {
 }
 
 const char* signal_name(SignalId id) { return signal_meta(id).name; }
+
+const char* signal_value_name(SignalId id, int value) {
+  switch (id) {
+    case SignalId::kCabinLightColor:
+      return gen::to_string(static_cast<gen::LightColor>(value));
+    case SignalId::kDoorState:
+      return gen::to_string(static_cast<gen::DoorState>(value));
+    case SignalId::kIgnitionState:
+      return gen::to_string(static_cast<gen::IgnitionState>(value));
+    default: return "";
+  }
+}
 
 }  // namespace cabin::signals
