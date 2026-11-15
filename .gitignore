@@ -1,0 +1,28 @@
+# Build outputs
+build/
+build-*/
+cmake-build-*/
+*.o
+*.a
+*.so
+*.dylib
+*.gcda
+*.gcno
+*.gcov
+compile_commands.json
+
+# Test / tool outputs that are generated on demand
+captures/*.jsonl
+fuzz/build/
+fuzz/crashes/
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Editor
+.vscode/
+.idea/
+*.swp

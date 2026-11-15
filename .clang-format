@@ -1,0 +1,22 @@
+---
+Language: Cpp
+BasedOnStyle: Google
+Standard: c++17
+ColumnLimit: 90
+IndentWidth: 2
+AccessModifierOffset: -1
+DerivePointerAlignment: false
+PointerAlignment: Left
+SortIncludes: CaseSensitive
+IncludeBlocks: Regroup
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: true
+BinPackParameters: true
+BreakBeforeBraces: Attach
+ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth: 4
+SpaceAfterCStyleCast: false
+SpacesBeforeTrailingComments: 1
