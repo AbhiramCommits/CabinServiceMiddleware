@@ -108,7 +108,7 @@ class [[nodiscard]] Result {
 template <>
 class [[nodiscard]] Result<void> {
  public:
-  Result() : error_() {}
+  Result() : error_(ErrorCode::kOk, "") {}
   Result(Error error) : error_(std::move(error)) {} // NOLINT(google-explicit-constructor)
   Result(ErrorCode code, std::string message) : error_(Error{code, std::move(message)}) {}
 

@@ -1,0 +1,269 @@
+{
+  "format": "cabin-idl",
+  "comment": "JSON syntax is a valid YAML 1.2 subset. tools/idlc.py uses Python's stdlib json module; no PyYAML dependency.",
+  "version": {"major": 1, "minor": 2},
+  "enums": {
+    "LightColor": ["WARM", "NEUTRAL", "COOL"],
+    "DoorState": ["CLOSED", "OPEN", "AJAR"],
+    "IgnitionState": ["OFF", "ACC", "ON"]
+  },
+  "signals": [
+    {
+      "name": "seat_position_mm",
+      "type": "u16",
+      "min": 0,
+      "max": 800,
+      "unit": "mm",
+      "can": {"frame_id": 288, "byte_offset": 0, "bit_length": 16, "scale": 1.0, "offset": 0.0}
+    },
+    {
+      "name": "seat_recline_deg",
+      "type": "u8",
+      "min": 0,
+      "max": 60,
+      "unit": "deg",
+      "can": {"frame_id": 288, "byte_offset": 2, "bit_length": 8, "scale": 1.0, "offset": 0.0}
+    },
+    {
+      "name": "hvac_setpoint_c",
+      "type": "f32",
+      "min": 16.0,
+      "max": 30.0,
+      "unit": "C",
+      "can": {"frame_id": 304, "byte_offset": 0, "bit_length": 32, "scale": 1.0, "offset": 0.0, "encoding": "f32"}
+    },
+    {
+      "name": "hvac_fan_level",
+      "type": "u8",
+      "min": 0,
+      "max": 7,
+      "unit": "level",
+      "can": {"frame_id": 304, "byte_offset": 4, "bit_length": 8, "scale": 1.0, "offset": 0.0}
+    },
+    {
+      "name": "cabin_light_level",
+      "type": "u8",
+      "min": 0,
+      "max": 100,
+      "unit": "percent",
+      "can": {"frame_id": 320, "byte_offset": 0, "bit_length": 8, "scale": 1.0, "offset": 0.0}
+    },
+    {
+      "name": "cabin_light_color",
+      "type": "enum:LightColor",
+      "unit": "enum",
+      "can": {"frame_id": 320, "byte_offset": 1, "bit_length": 8, "scale": 1.0, "offset": 0.0}
+    },
+    {
+      "name": "door_state",
+      "type": "enum:DoorState",
+      "unit": "enum",
+      "can": {"frame_id": 336, "byte_offset": 0, "bit_length": 8, "scale": 1.0, "offset": 0.0}
+    },
+    {
+      "name": "ignition_state",
+      "type": "enum:IgnitionState",
+      "unit": "enum",
+      "can": {"frame_id": 352, "byte_offset": 0, "bit_length": 8, "scale": 1.0, "offset": 0.0}
+    }
+  ],
+  "structs": {
+    "Empty": {"fields": []},
+    "SeatSetPositionRequest": {
+      "fields": [
+        {"name": "position_mm", "type": "u16", "min": 0, "max": 800},
+        {"name": "recline_deg", "type": "u8", "min": 0, "max": 60}
+      ]
+    },
+    "SeatSetPositionResponse": {
+      "fields": [
+        {"name": "accepted", "type": "bool"},
+        {"name": "position_mm", "type": "u16", "min": 0, "max": 800},
+        {"name": "recline_deg", "type": "u8", "min": 0, "max": 60}
+      ]
+    },
+    "SeatState": {
+      "fields": [
+        {"name": "position_mm", "type": "u16", "min": 0, "max": 800},
+        {"name": "recline_deg", "type": "u8", "min": 0, "max": 60},
+        {"name": "timestamp_us", "type": "u64"}
+      ]
+    },
+    "HvacSetRequest": {
+      "fields": [
+        {"name": "setpoint_c", "type": "f32", "min": 16.0, "max": 30.0},
+        {"name": "fan_level", "type": "u8", "min": 0, "max": 7}
+      ]
+    },
+    "HvacSetResponse": {
+      "fields": [
+        {"name": "accepted", "type": "bool"},
+        {"name": "setpoint_c", "type": "f32", "min": 16.0, "max": 30.0},
+        {"name": "fan_level", "type": "u8", "min": 0, "max": 7}
+      ]
+    },
+    "HvacState": {
+      "fields": [
+        {"name": "setpoint_c", "type": "f32", "min": 16.0, "max": 30.0},
+        {"name": "fan_level", "type": "u8", "min": 0, "max": 7},
+        {"name": "timestamp_us", "type": "u64"}
+      ]
+    },
+    "LightSetRequest": {
+      "fields": [
+        {"name": "level", "type": "u8", "min": 0, "max": 100},
+        {"name": "color", "type": "enum:LightColor"}
+      ]
+    },
+    "LightSetResponse": {
+      "fields": [
+        {"name": "accepted", "type": "bool"},
+        {"name": "level", "type": "u8", "min": 0, "max": 100},
+        {"name": "color", "type": "enum:LightColor"}
+      ]
+    },
+    "LightState": {
+      "fields": [
+        {"name": "level", "type": "u8", "min": 0, "max": 100},
+        {"name": "color", "type": "enum:LightColor"},
+        {"name": "timestamp_us", "type": "u64"}
+      ]
+    },
+    "SignalSnapshot": {
+      "fields": [
+        {"name": "seat_position_mm", "type": "u16", "min": 0, "max": 800},
+        {"name": "seat_recline_deg", "type": "u8", "min": 0, "max": 60},
+        {"name": "hvac_setpoint_c", "type": "f32", "min": 16.0, "max": 30.0},
+        {"name": "hvac_fan_level", "type": "u8", "min": 0, "max": 7},
+        {"name": "cabin_light_level", "type": "u8", "min": 0, "max": 100},
+        {"name": "cabin_light_color", "type": "enum:LightColor"},
+        {"name": "door_state", "type": "enum:DoorState"},
+        {"name": "ignition_state", "type": "enum:IgnitionState"},
+        {"name": "timestamp_us", "type": "u64"}
+      ]
+    },
+    "SignalSetRequest": {
+      "fields": [
+        {"name": "name", "type": "string", "max_len": 64},
+        {"name": "value", "type": "f64"}
+      ]
+    },
+    "SignalSetResponse": {
+      "fields": [
+        {"name": "accepted", "type": "bool"},
+        {"name": "applied_value", "type": "f64"},
+        {"name": "timestamp_us", "type": "u64"}
+      ]
+    },
+    "Profile": {
+      "fields": [
+        {"name": "driver_id", "type": "string", "max_len": 64},
+        {"name": "seat_position_mm", "type": "u16", "min": 0, "max": 800},
+        {"name": "seat_recline_deg", "type": "u8", "min": 0, "max": 60},
+        {"name": "hvac_setpoint_c", "type": "f32", "min": 16.0, "max": 30.0},
+        {"name": "hvac_fan_level", "type": "u8", "min": 0, "max": 7},
+        {"name": "light_level", "type": "u8", "min": 0, "max": 100},
+        {"name": "light_color", "type": "enum:LightColor"},
+        {"name": "schema_version", "type": "u16", "min": 1, "max": 1},
+        {"name": "preferred_language", "type": "string", "max_len": 16, "since_minor": 2, "default": "en"}
+      ]
+    },
+    "GetProfileRequest": {
+      "fields": [
+        {"name": "driver_id", "type": "string", "max_len": 64}
+      ]
+    },
+    "GetProfileResponse": {
+      "fields": [
+        {"name": "found", "type": "bool"},
+        {"name": "profile", "type": "struct:Profile"}
+      ]
+    },
+    "PutProfileRequest": {
+      "fields": [
+        {"name": "profile", "type": "struct:Profile"}
+      ]
+    },
+    "PutProfileResponse": {
+      "fields": [
+        {"name": "accepted", "type": "bool"},
+        {"name": "schema_version", "type": "u16"}
+      ]
+    },
+    "ApplyProfileRequest": {
+      "fields": [
+        {"name": "driver_id", "type": "string", "max_len": 64}
+      ]
+    },
+    "ApplyProfileResponse": {
+      "fields": [
+        {"name": "applied", "type": "bool"},
+        {"name": "latency_us", "type": "u32"}
+      ]
+    },
+    "ProfileAppliedEvent": {
+      "fields": [
+        {"name": "driver_id", "type": "string", "max_len": 64},
+        {"name": "latency_us", "type": "u32"}
+      ]
+    }
+  },
+  "services": [
+    {
+      "name": "SeatService",
+      "id": 257,
+      "methods": [
+        {"name": "SetPosition", "id": 1, "request": "SeatSetPositionRequest", "response": "SeatSetPositionResponse"},
+        {"name": "GetState", "id": 2, "request": "Empty", "response": "SeatState"}
+      ],
+      "events": [
+        {"name": "SeatStateChanged", "id": 1, "type": "SeatState"}
+      ]
+    },
+    {
+      "name": "HvacService",
+      "id": 258,
+      "methods": [
+        {"name": "SetSetpoint", "id": 1, "request": "HvacSetRequest", "response": "HvacSetResponse"},
+        {"name": "GetState", "id": 2, "request": "Empty", "response": "HvacState"}
+      ],
+      "events": [
+        {"name": "HvacStateChanged", "id": 1, "type": "HvacState"}
+      ]
+    },
+    {
+      "name": "LightingService",
+      "id": 259,
+      "methods": [
+        {"name": "SetLight", "id": 1, "request": "LightSetRequest", "response": "LightSetResponse"},
+        {"name": "GetState", "id": 2, "request": "Empty", "response": "LightState"}
+      ],
+      "events": [
+        {"name": "LightStateChanged", "id": 1, "type": "LightState"}
+      ]
+    },
+    {
+      "name": "PersonalizationService",
+      "id": 260,
+      "methods": [
+        {"name": "GetProfile", "id": 1, "request": "GetProfileRequest", "response": "GetProfileResponse"},
+        {"name": "PutProfile", "id": 2, "request": "PutProfileRequest", "response": "PutProfileResponse"},
+        {"name": "ApplyProfile", "id": 3, "request": "ApplyProfileRequest", "response": "ApplyProfileResponse"}
+      ],
+      "events": [
+        {"name": "ProfileApplied", "id": 1, "type": "ProfileAppliedEvent"}
+      ]
+    },
+    {
+      "name": "SignalService",
+      "id": 261,
+      "methods": [
+        {"name": "GetSignals", "id": 1, "request": "Empty", "response": "SignalSnapshot"},
+        {"name": "SetSignal", "id": 2, "request": "SignalSetRequest", "response": "SignalSetResponse"}
+      ],
+      "events": [
+        {"name": "SignalChanged", "id": 1, "type": "SignalSnapshot"}
+      ]
+    }
+  ]
+}

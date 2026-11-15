@@ -1,0 +1,1008 @@
+{
+  "enums": {
+    "DoorState": {
+      "values": [
+        "CLOSED",
+        "OPEN",
+        "AJAR"
+      ],
+      "values_by_name": {
+        "AJAR": 2,
+        "CLOSED": 0,
+        "OPEN": 1
+      }
+    },
+    "IgnitionState": {
+      "values": [
+        "OFF",
+        "ACC",
+        "ON"
+      ],
+      "values_by_name": {
+        "ACC": 1,
+        "OFF": 0,
+        "ON": 2
+      }
+    },
+    "LightColor": {
+      "values": [
+        "WARM",
+        "NEUTRAL",
+        "COOL"
+      ],
+      "values_by_name": {
+        "COOL": 2,
+        "NEUTRAL": 1,
+        "WARM": 0
+      }
+    }
+  },
+  "generator": "tools/idlc.py",
+  "schema": "cabin-api",
+  "services": [
+    {
+      "events": [
+        {
+          "id": 1,
+          "name": "SeatStateChanged",
+          "type": "SeatState"
+        }
+      ],
+      "id": 257,
+      "methods": [
+        {
+          "cpp_name": "set_position",
+          "id": 1,
+          "name": "SetPosition",
+          "request": "SeatSetPositionRequest",
+          "response": "SeatSetPositionResponse"
+        },
+        {
+          "cpp_name": "get_state",
+          "id": 2,
+          "name": "GetState",
+          "request": "Empty",
+          "response": "SeatState"
+        }
+      ],
+      "name": "SeatService"
+    },
+    {
+      "events": [
+        {
+          "id": 1,
+          "name": "HvacStateChanged",
+          "type": "HvacState"
+        }
+      ],
+      "id": 258,
+      "methods": [
+        {
+          "cpp_name": "set_setpoint",
+          "id": 1,
+          "name": "SetSetpoint",
+          "request": "HvacSetRequest",
+          "response": "HvacSetResponse"
+        },
+        {
+          "cpp_name": "get_state",
+          "id": 2,
+          "name": "GetState",
+          "request": "Empty",
+          "response": "HvacState"
+        }
+      ],
+      "name": "HvacService"
+    },
+    {
+      "events": [
+        {
+          "id": 1,
+          "name": "LightStateChanged",
+          "type": "LightState"
+        }
+      ],
+      "id": 259,
+      "methods": [
+        {
+          "cpp_name": "set_light",
+          "id": 1,
+          "name": "SetLight",
+          "request": "LightSetRequest",
+          "response": "LightSetResponse"
+        },
+        {
+          "cpp_name": "get_state",
+          "id": 2,
+          "name": "GetState",
+          "request": "Empty",
+          "response": "LightState"
+        }
+      ],
+      "name": "LightingService"
+    },
+    {
+      "events": [
+        {
+          "id": 1,
+          "name": "ProfileApplied",
+          "type": "ProfileAppliedEvent"
+        }
+      ],
+      "id": 260,
+      "methods": [
+        {
+          "cpp_name": "get_profile",
+          "id": 1,
+          "name": "GetProfile",
+          "request": "GetProfileRequest",
+          "response": "GetProfileResponse"
+        },
+        {
+          "cpp_name": "put_profile",
+          "id": 2,
+          "name": "PutProfile",
+          "request": "PutProfileRequest",
+          "response": "PutProfileResponse"
+        },
+        {
+          "cpp_name": "apply_profile",
+          "id": 3,
+          "name": "ApplyProfile",
+          "request": "ApplyProfileRequest",
+          "response": "ApplyProfileResponse"
+        }
+      ],
+      "name": "PersonalizationService"
+    },
+    {
+      "events": [
+        {
+          "id": 1,
+          "name": "SignalChanged",
+          "type": "SignalSnapshot"
+        }
+      ],
+      "id": 261,
+      "methods": [
+        {
+          "cpp_name": "get_signals",
+          "id": 1,
+          "name": "GetSignals",
+          "request": "Empty",
+          "response": "SignalSnapshot"
+        },
+        {
+          "cpp_name": "set_signal",
+          "id": 2,
+          "name": "SetSignal",
+          "request": "SignalSetRequest",
+          "response": "SignalSetResponse"
+        }
+      ],
+      "name": "SignalService"
+    }
+  ],
+  "signals": [
+    {
+      "can": {
+        "bit_length": 16,
+        "bit_offset": 0,
+        "byte_offset": 0,
+        "encoding": "uint",
+        "frame_id": 288,
+        "offset": 0.0,
+        "scale": 1.0
+      },
+      "cpp_name": "SeatPositionMm",
+      "enum": null,
+      "max": 800,
+      "min": 0,
+      "name": "seat_position_mm",
+      "type": "u16",
+      "unit": "mm"
+    },
+    {
+      "can": {
+        "bit_length": 8,
+        "bit_offset": 16,
+        "byte_offset": 2,
+        "encoding": "uint",
+        "frame_id": 288,
+        "offset": 0.0,
+        "scale": 1.0
+      },
+      "cpp_name": "SeatReclineDeg",
+      "enum": null,
+      "max": 60,
+      "min": 0,
+      "name": "seat_recline_deg",
+      "type": "u8",
+      "unit": "deg"
+    },
+    {
+      "can": {
+        "bit_length": 32,
+        "bit_offset": 0,
+        "byte_offset": 0,
+        "encoding": "f32",
+        "frame_id": 304,
+        "offset": 0.0,
+        "scale": 1.0
+      },
+      "cpp_name": "HvacSetpointC",
+      "enum": null,
+      "max": 30.0,
+      "min": 16.0,
+      "name": "hvac_setpoint_c",
+      "type": "f32",
+      "unit": "C"
+    },
+    {
+      "can": {
+        "bit_length": 8,
+        "bit_offset": 32,
+        "byte_offset": 4,
+        "encoding": "uint",
+        "frame_id": 304,
+        "offset": 0.0,
+        "scale": 1.0
+      },
+      "cpp_name": "HvacFanLevel",
+      "enum": null,
+      "max": 7,
+      "min": 0,
+      "name": "hvac_fan_level",
+      "type": "u8",
+      "unit": "level"
+    },
+    {
+      "can": {
+        "bit_length": 8,
+        "bit_offset": 0,
+        "byte_offset": 0,
+        "encoding": "uint",
+        "frame_id": 320,
+        "offset": 0.0,
+        "scale": 1.0
+      },
+      "cpp_name": "CabinLightLevel",
+      "enum": null,
+      "max": 100,
+      "min": 0,
+      "name": "cabin_light_level",
+      "type": "u8",
+      "unit": "percent"
+    },
+    {
+      "can": {
+        "bit_length": 8,
+        "bit_offset": 8,
+        "byte_offset": 1,
+        "encoding": "uint",
+        "frame_id": 320,
+        "offset": 0.0,
+        "scale": 1.0
+      },
+      "cpp_name": "CabinLightColor",
+      "enum": "LightColor",
+      "max": 2,
+      "min": 0,
+      "name": "cabin_light_color",
+      "type": "enum:LightColor",
+      "unit": "enum"
+    },
+    {
+      "can": {
+        "bit_length": 8,
+        "bit_offset": 0,
+        "byte_offset": 0,
+        "encoding": "uint",
+        "frame_id": 336,
+        "offset": 0.0,
+        "scale": 1.0
+      },
+      "cpp_name": "DoorState",
+      "enum": "DoorState",
+      "max": 2,
+      "min": 0,
+      "name": "door_state",
+      "type": "enum:DoorState",
+      "unit": "enum"
+    },
+    {
+      "can": {
+        "bit_length": 8,
+        "bit_offset": 0,
+        "byte_offset": 0,
+        "encoding": "uint",
+        "frame_id": 352,
+        "offset": 0.0,
+        "scale": 1.0
+      },
+      "cpp_name": "IgnitionState",
+      "enum": "IgnitionState",
+      "max": 2,
+      "min": 0,
+      "name": "ignition_state",
+      "type": "enum:IgnitionState",
+      "unit": "enum"
+    }
+  ],
+  "structs": {
+    "ApplyProfileRequest": {
+      "fields": [
+        {
+          "cpp_type": "std::string",
+          "default": null,
+          "max": null,
+          "max_len": 64,
+          "min": null,
+          "name": "driver_id",
+          "since_minor": null,
+          "type": "string"
+        }
+      ]
+    },
+    "ApplyProfileResponse": {
+      "fields": [
+        {
+          "cpp_type": "bool",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "applied",
+          "since_minor": null,
+          "type": "bool"
+        },
+        {
+          "cpp_type": "std::uint32_t",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "latency_us",
+          "since_minor": null,
+          "type": "u32"
+        }
+      ]
+    },
+    "Empty": {
+      "fields": []
+    },
+    "GetProfileRequest": {
+      "fields": [
+        {
+          "cpp_type": "std::string",
+          "default": null,
+          "max": null,
+          "max_len": 64,
+          "min": null,
+          "name": "driver_id",
+          "since_minor": null,
+          "type": "string"
+        }
+      ]
+    },
+    "GetProfileResponse": {
+      "fields": [
+        {
+          "cpp_type": "bool",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "found",
+          "since_minor": null,
+          "type": "bool"
+        },
+        {
+          "cpp_type": "Profile",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "profile",
+          "since_minor": null,
+          "type": "struct:Profile"
+        }
+      ]
+    },
+    "HvacSetRequest": {
+      "fields": [
+        {
+          "cpp_type": "float",
+          "default": null,
+          "max": 30.0,
+          "max_len": null,
+          "min": 16.0,
+          "name": "setpoint_c",
+          "since_minor": null,
+          "type": "f32"
+        },
+        {
+          "cpp_type": "std::uint8_t",
+          "default": null,
+          "max": 7,
+          "max_len": null,
+          "min": 0,
+          "name": "fan_level",
+          "since_minor": null,
+          "type": "u8"
+        }
+      ]
+    },
+    "HvacSetResponse": {
+      "fields": [
+        {
+          "cpp_type": "bool",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "accepted",
+          "since_minor": null,
+          "type": "bool"
+        },
+        {
+          "cpp_type": "float",
+          "default": null,
+          "max": 30.0,
+          "max_len": null,
+          "min": 16.0,
+          "name": "setpoint_c",
+          "since_minor": null,
+          "type": "f32"
+        },
+        {
+          "cpp_type": "std::uint8_t",
+          "default": null,
+          "max": 7,
+          "max_len": null,
+          "min": 0,
+          "name": "fan_level",
+          "since_minor": null,
+          "type": "u8"
+        }
+      ]
+    },
+    "HvacState": {
+      "fields": [
+        {
+          "cpp_type": "float",
+          "default": null,
+          "max": 30.0,
+          "max_len": null,
+          "min": 16.0,
+          "name": "setpoint_c",
+          "since_minor": null,
+          "type": "f32"
+        },
+        {
+          "cpp_type": "std::uint8_t",
+          "default": null,
+          "max": 7,
+          "max_len": null,
+          "min": 0,
+          "name": "fan_level",
+          "since_minor": null,
+          "type": "u8"
+        },
+        {
+          "cpp_type": "std::uint64_t",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "timestamp_us",
+          "since_minor": null,
+          "type": "u64"
+        }
+      ]
+    },
+    "LightSetRequest": {
+      "fields": [
+        {
+          "cpp_type": "std::uint8_t",
+          "default": null,
+          "max": 100,
+          "max_len": null,
+          "min": 0,
+          "name": "level",
+          "since_minor": null,
+          "type": "u8"
+        },
+        {
+          "cpp_type": "LightColor",
+          "default": null,
+          "enum": "LightColor",
+          "max": 2,
+          "max_len": null,
+          "min": 0,
+          "name": "color",
+          "since_minor": null,
+          "type": "enum:LightColor"
+        }
+      ]
+    },
+    "LightSetResponse": {
+      "fields": [
+        {
+          "cpp_type": "bool",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "accepted",
+          "since_minor": null,
+          "type": "bool"
+        },
+        {
+          "cpp_type": "std::uint8_t",
+          "default": null,
+          "max": 100,
+          "max_len": null,
+          "min": 0,
+          "name": "level",
+          "since_minor": null,
+          "type": "u8"
+        },
+        {
+          "cpp_type": "LightColor",
+          "default": null,
+          "enum": "LightColor",
+          "max": 2,
+          "max_len": null,
+          "min": 0,
+          "name": "color",
+          "since_minor": null,
+          "type": "enum:LightColor"
+        }
+      ]
+    },
+    "LightState": {
+      "fields": [
+        {
+          "cpp_type": "std::uint8_t",
+          "default": null,
+          "max": 100,
+          "max_len": null,
+          "min": 0,
+          "name": "level",
+          "since_minor": null,
+          "type": "u8"
+        },
+        {
+          "cpp_type": "LightColor",
+          "default": null,
+          "enum": "LightColor",
+          "max": 2,
+          "max_len": null,
+          "min": 0,
+          "name": "color",
+          "since_minor": null,
+          "type": "enum:LightColor"
+        },
+        {
+          "cpp_type": "std::uint64_t",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "timestamp_us",
+          "since_minor": null,
+          "type": "u64"
+        }
+      ]
+    },
+    "Profile": {
+      "fields": [
+        {
+          "cpp_type": "std::string",
+          "default": null,
+          "max": null,
+          "max_len": 64,
+          "min": null,
+          "name": "driver_id",
+          "since_minor": null,
+          "type": "string"
+        },
+        {
+          "cpp_type": "std::uint16_t",
+          "default": null,
+          "max": 800,
+          "max_len": null,
+          "min": 0,
+          "name": "seat_position_mm",
+          "since_minor": null,
+          "type": "u16"
+        },
+        {
+          "cpp_type": "std::uint8_t",
+          "default": null,
+          "max": 60,
+          "max_len": null,
+          "min": 0,
+          "name": "seat_recline_deg",
+          "since_minor": null,
+          "type": "u8"
+        },
+        {
+          "cpp_type": "float",
+          "default": null,
+          "max": 30.0,
+          "max_len": null,
+          "min": 16.0,
+          "name": "hvac_setpoint_c",
+          "since_minor": null,
+          "type": "f32"
+        },
+        {
+          "cpp_type": "std::uint8_t",
+          "default": null,
+          "max": 7,
+          "max_len": null,
+          "min": 0,
+          "name": "hvac_fan_level",
+          "since_minor": null,
+          "type": "u8"
+        },
+        {
+          "cpp_type": "std::uint8_t",
+          "default": null,
+          "max": 100,
+          "max_len": null,
+          "min": 0,
+          "name": "light_level",
+          "since_minor": null,
+          "type": "u8"
+        },
+        {
+          "cpp_type": "LightColor",
+          "default": null,
+          "enum": "LightColor",
+          "max": 2,
+          "max_len": null,
+          "min": 0,
+          "name": "light_color",
+          "since_minor": null,
+          "type": "enum:LightColor"
+        },
+        {
+          "cpp_type": "std::uint16_t",
+          "default": null,
+          "max": 1,
+          "max_len": null,
+          "min": 1,
+          "name": "schema_version",
+          "since_minor": null,
+          "type": "u16"
+        },
+        {
+          "cpp_type": "std::string",
+          "default": "en",
+          "max": null,
+          "max_len": 16,
+          "min": null,
+          "name": "preferred_language",
+          "since_minor": 2,
+          "type": "string"
+        }
+      ]
+    },
+    "ProfileAppliedEvent": {
+      "fields": [
+        {
+          "cpp_type": "std::string",
+          "default": null,
+          "max": null,
+          "max_len": 64,
+          "min": null,
+          "name": "driver_id",
+          "since_minor": null,
+          "type": "string"
+        },
+        {
+          "cpp_type": "std::uint32_t",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "latency_us",
+          "since_minor": null,
+          "type": "u32"
+        }
+      ]
+    },
+    "PutProfileRequest": {
+      "fields": [
+        {
+          "cpp_type": "Profile",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "profile",
+          "since_minor": null,
+          "type": "struct:Profile"
+        }
+      ]
+    },
+    "PutProfileResponse": {
+      "fields": [
+        {
+          "cpp_type": "bool",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "accepted",
+          "since_minor": null,
+          "type": "bool"
+        },
+        {
+          "cpp_type": "std::uint16_t",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "schema_version",
+          "since_minor": null,
+          "type": "u16"
+        }
+      ]
+    },
+    "SeatSetPositionRequest": {
+      "fields": [
+        {
+          "cpp_type": "std::uint16_t",
+          "default": null,
+          "max": 800,
+          "max_len": null,
+          "min": 0,
+          "name": "position_mm",
+          "since_minor": null,
+          "type": "u16"
+        },
+        {
+          "cpp_type": "std::uint8_t",
+          "default": null,
+          "max": 60,
+          "max_len": null,
+          "min": 0,
+          "name": "recline_deg",
+          "since_minor": null,
+          "type": "u8"
+        }
+      ]
+    },
+    "SeatSetPositionResponse": {
+      "fields": [
+        {
+          "cpp_type": "bool",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "accepted",
+          "since_minor": null,
+          "type": "bool"
+        },
+        {
+          "cpp_type": "std::uint16_t",
+          "default": null,
+          "max": 800,
+          "max_len": null,
+          "min": 0,
+          "name": "position_mm",
+          "since_minor": null,
+          "type": "u16"
+        },
+        {
+          "cpp_type": "std::uint8_t",
+          "default": null,
+          "max": 60,
+          "max_len": null,
+          "min": 0,
+          "name": "recline_deg",
+          "since_minor": null,
+          "type": "u8"
+        }
+      ]
+    },
+    "SeatState": {
+      "fields": [
+        {
+          "cpp_type": "std::uint16_t",
+          "default": null,
+          "max": 800,
+          "max_len": null,
+          "min": 0,
+          "name": "position_mm",
+          "since_minor": null,
+          "type": "u16"
+        },
+        {
+          "cpp_type": "std::uint8_t",
+          "default": null,
+          "max": 60,
+          "max_len": null,
+          "min": 0,
+          "name": "recline_deg",
+          "since_minor": null,
+          "type": "u8"
+        },
+        {
+          "cpp_type": "std::uint64_t",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "timestamp_us",
+          "since_minor": null,
+          "type": "u64"
+        }
+      ]
+    },
+    "SignalSetRequest": {
+      "fields": [
+        {
+          "cpp_type": "std::string",
+          "default": null,
+          "max": null,
+          "max_len": 64,
+          "min": null,
+          "name": "name",
+          "since_minor": null,
+          "type": "string"
+        },
+        {
+          "cpp_type": "double",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "value",
+          "since_minor": null,
+          "type": "f64"
+        }
+      ]
+    },
+    "SignalSetResponse": {
+      "fields": [
+        {
+          "cpp_type": "bool",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "accepted",
+          "since_minor": null,
+          "type": "bool"
+        },
+        {
+          "cpp_type": "double",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "applied_value",
+          "since_minor": null,
+          "type": "f64"
+        },
+        {
+          "cpp_type": "std::uint64_t",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "timestamp_us",
+          "since_minor": null,
+          "type": "u64"
+        }
+      ]
+    },
+    "SignalSnapshot": {
+      "fields": [
+        {
+          "cpp_type": "std::uint16_t",
+          "default": null,
+          "max": 800,
+          "max_len": null,
+          "min": 0,
+          "name": "seat_position_mm",
+          "since_minor": null,
+          "type": "u16"
+        },
+        {
+          "cpp_type": "std::uint8_t",
+          "default": null,
+          "max": 60,
+          "max_len": null,
+          "min": 0,
+          "name": "seat_recline_deg",
+          "since_minor": null,
+          "type": "u8"
+        },
+        {
+          "cpp_type": "float",
+          "default": null,
+          "max": 30.0,
+          "max_len": null,
+          "min": 16.0,
+          "name": "hvac_setpoint_c",
+          "since_minor": null,
+          "type": "f32"
+        },
+        {
+          "cpp_type": "std::uint8_t",
+          "default": null,
+          "max": 7,
+          "max_len": null,
+          "min": 0,
+          "name": "hvac_fan_level",
+          "since_minor": null,
+          "type": "u8"
+        },
+        {
+          "cpp_type": "std::uint8_t",
+          "default": null,
+          "max": 100,
+          "max_len": null,
+          "min": 0,
+          "name": "cabin_light_level",
+          "since_minor": null,
+          "type": "u8"
+        },
+        {
+          "cpp_type": "LightColor",
+          "default": null,
+          "enum": "LightColor",
+          "max": 2,
+          "max_len": null,
+          "min": 0,
+          "name": "cabin_light_color",
+          "since_minor": null,
+          "type": "enum:LightColor"
+        },
+        {
+          "cpp_type": "DoorState",
+          "default": null,
+          "enum": "DoorState",
+          "max": 2,
+          "max_len": null,
+          "min": 0,
+          "name": "door_state",
+          "since_minor": null,
+          "type": "enum:DoorState"
+        },
+        {
+          "cpp_type": "IgnitionState",
+          "default": null,
+          "enum": "IgnitionState",
+          "max": 2,
+          "max_len": null,
+          "min": 0,
+          "name": "ignition_state",
+          "since_minor": null,
+          "type": "enum:IgnitionState"
+        },
+        {
+          "cpp_type": "std::uint64_t",
+          "default": null,
+          "max": null,
+          "max_len": null,
+          "min": null,
+          "name": "timestamp_us",
+          "since_minor": null,
+          "type": "u64"
+        }
+      ]
+    }
+  },
+  "version": {
+    "major": 1,
+    "minor": 2
+  }
+}

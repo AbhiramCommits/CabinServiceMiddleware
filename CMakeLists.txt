@@ -50,10 +50,14 @@ find_package(Threads REQUIRED)
 set(CABIN_CORE_SOURCES
   src/core/log.cpp
   src/core/trace.cpp
+  src/core/frame.cpp
+  generated/cabin_serdes.cpp
+  generated/cabin_can_map.cpp
 )
 
 add_library(cabin_core STATIC ${CABIN_CORE_SOURCES})
-target_include_directories(cabin_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(cabin_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+                                            ${CMAKE_CURRENT_SOURCE_DIR}/generated)
 target_link_libraries(cabin_core PUBLIC Threads::Threads)
 cabin_set_warnings(cabin_core)
 
