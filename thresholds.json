@@ -1,0 +1,13 @@
+{
+  "_comment": "Empirically derived from this build, not aspirational. IPC p99 threshold is 2x the measured Release p99 (1307 us -> 2600 us); profile-apply p95 is 1800 us, covering the worst observed local run (1040 us) with headroom for CI runners; the line-coverage floor is measured 66.2% minus 6 points. Re-derive after any intentional performance or coverage change.",
+  "min_line_coverage_percent": 60.0,
+  "max_ipc_p99_us": 2600.0,
+  "max_profile_apply_p95_us": 1800.0,
+  "fail_on_sanitizer_report": true,
+  "_measurements_at_set_time": {
+    "ipc_p99_us": 1307.0,
+    "profile_apply_p95_us": 1040.0,
+    "line_coverage_percent": 66.2,
+    "function_coverage_percent": 74.91
+  }
+}

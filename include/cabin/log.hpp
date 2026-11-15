@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <cstdint>
 #include <initializer_list>
 #include <string>
@@ -69,10 +70,11 @@ class Logger {
 
   ~Logger();
 
-  void set_level(Level level) { level_ = level; }
-  Level level() const { return level_; }
+  void set_level(Level level) { level_.store(level, std::memory_order_relaxed); }
+  Level level() const { return level_.load(std::memory_order_relaxed); }
   bool enabled(Level level) const {
-    return level_ != kOff && static_cast<int>(level) >= static_cast<int>(level_);
+    const Level current = level_.load(std::memory_order_relaxed);
+    return current != kOff && static_cast<int>(level) >= static_cast<int>(current);
   }
 
   // `service` and `event` are copied into the record; `fields` must already be
@@ -83,7 +85,7 @@ class Logger {
                   const std::vector<std::pair<std::string, std::string>>& fields);
 
   // Test hooks: capture output without touching process-wide files.
-  void set_sink_for_testing(std::string* sink) { test_sink_ = sink; }
+  void set_sink_for_testing(std::string* sink);
   void reset_for_testing();
 
   static std::string format_record(const LogRecord& record);
@@ -93,10 +95,7 @@ class Logger {
  private:
   Logger();
 
-  Level level_{Level::kInfo};
-  std::string trace_id_;
-  std::string span_;
-  std::string buf_;
+  std::atomic<Level> level_{Level::kInfo};
   std::string* test_sink_{nullptr};
   void* file_{nullptr};
 };

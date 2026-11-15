@@ -23,11 +23,10 @@ int set_nonblocking(int fd) {
   return ::fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
-void close_fd(int& fd) {
-  if (fd >= 0) {
-    ::close(fd);
-    fd = -1;
-  }
+void close_fd(std::atomic<int>& fd) {
+  const int value = fd.exchange(-1);
+  if (value >= 0)
+    ::close(value);
 }
 
 #ifndef MSG_NOSIGNAL
@@ -61,26 +60,27 @@ Result<void> Broker::start() {
                       "runtime dir is too long for a Unix socket path");
   }
 
-  listen_fd_ = ::socket(AF_UNIX, SOCK_STREAM, 0);
-  if (listen_fd_ < 0) {
+  const int listener = ::socket(AF_UNIX, SOCK_STREAM, 0);
+  listen_fd_.store(listener);
+  if (listener < 0) {
     return make_error(ErrorCode::kIo, std::string("socket: ") + std::strerror(errno));
   }
   ::unlink(socket_path_.c_str());
   address.sun_family = AF_UNIX;
   std::memcpy(address.sun_path, socket_path_.c_str(), socket_path_.size() + 1);
-  if (::bind(listen_fd_, reinterpret_cast<sockaddr*>(&address), sizeof(address)) != 0) {
+  if (::bind(listener, reinterpret_cast<sockaddr*>(&address), sizeof(address)) != 0) {
     const std::string message =
         std::string("bind ") + socket_path_ + ": " + std::strerror(errno);
     close_fd(listen_fd_);
     return make_error(ErrorCode::kIo, message);
   }
-  if (::listen(listen_fd_, 64) != 0) {
+  if (::listen(listener, 64) != 0) {
     const std::string message = std::string("listen: ") + std::strerror(errno);
     close_fd(listen_fd_);
     ::unlink(socket_path_.c_str());
     return make_error(ErrorCode::kIo, message);
   }
-  set_nonblocking(listen_fd_);
+  set_nonblocking(listener);
 
   int wake[2] = {-1, -1};
   if (::pipe(wake) != 0) {
@@ -88,10 +88,10 @@ Result<void> Broker::start() {
     ::unlink(socket_path_.c_str());
     return make_error(ErrorCode::kIo, std::string("pipe: ") + std::strerror(errno));
   }
-  wake_read_ = wake[0];
-  wake_write_ = wake[1];
-  set_nonblocking(wake_read_);
-  set_nonblocking(wake_write_);
+  wake_read_.store(wake[0]);
+  wake_write_.store(wake[1]);
+  set_nonblocking(wake[0]);
+  set_nonblocking(wake[1]);
 
   running_.store(true);
   stopping_.store(false);
@@ -120,9 +120,10 @@ void Broker::run_async() {
 void Broker::stop() {
   stopping_.store(true);
   running_.store(false);
-  if (wake_write_ >= 0) {
+  const int wake = wake_write_.load();
+  if (wake >= 0) {
     const std::uint8_t byte = 1;
-    const ssize_t ignored = ::write(wake_write_, &byte, 1);
+    const ssize_t ignored = ::write(wake, &byte, 1);
     (void)ignored;
   }
 }
@@ -135,8 +136,8 @@ void Broker::loop() {
   std::vector<pollfd> fds;
   while (running_.load()) {
     fds.clear();
-    fds.push_back(pollfd{listen_fd_, POLLIN, 0});
-    fds.push_back(pollfd{wake_read_, POLLIN, 0});
+    fds.push_back(pollfd{listen_fd_.load(), POLLIN, 0});
+    fds.push_back(pollfd{wake_read_.load(), POLLIN, 0});
     std::vector<std::uint64_t> ids;
     ids.reserve(clients_.size());
     for (const auto& client : clients_) {
@@ -163,7 +164,8 @@ void Broker::loop() {
 
     if ((fds[1].revents & POLLIN) != 0) {
       std::uint8_t drain[64];
-      while (::read(wake_read_, drain, sizeof(drain)) > 0) {
+      const int wake = wake_read_.load();
+      while (wake >= 0 && ::read(wake, drain, sizeof(drain)) > 0) {
       }
       if (stopping_.load())
         break;
@@ -196,7 +198,7 @@ void Broker::loop() {
 }
 
 void Broker::cleanup() {
-  const bool had_listener = listen_fd_ >= 0;
+  const bool had_listener = listen_fd_.load() >= 0;
   for (auto& client : clients_) {
     if (client->fd >= 0) {
       ::close(client->fd);
@@ -218,7 +220,7 @@ void Broker::cleanup() {
 
 void Broker::accept_clients() {
   while (true) {
-    const int fd = ::accept(listen_fd_, nullptr, nullptr);
+    const int fd = ::accept(listen_fd_.load(), nullptr, nullptr);
     if (fd < 0) {
       if (errno == EAGAIN || errno == EWOULDBLOCK)
         return;

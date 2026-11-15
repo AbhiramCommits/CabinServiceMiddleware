@@ -147,10 +147,15 @@ Level Logger::level_from_env() {
   return Level::kInfo;
 }
 
+void Logger::set_sink_for_testing(std::string* sink) {
+  std::lock_guard<std::mutex> lock(g_log_mutex);
+  test_sink_ = sink;
+}
+
 void Logger::reset_for_testing() {
   std::lock_guard<std::mutex> lock(g_log_mutex);
   test_sink_ = nullptr;
-  level_ = Level::kInfo;
+  level_.store(Level::kInfo, std::memory_order_relaxed);
 }
 
 std::string Logger::format_record(const LogRecord& record) {

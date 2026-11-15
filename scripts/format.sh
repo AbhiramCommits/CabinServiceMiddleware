@@ -10,7 +10,8 @@ if ! command -v clang-format >/dev/null 2>&1; then
 fi
 
 files=$(find include src tests bench fuzz -type f \
-  \( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' -o -name '*.cc' \) 2>/dev/null || true)
+  \( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' -o -name '*.cc' \) \
+  -not -path '*/generated/*' 2>/dev/null || true)
 
 if [[ -z "${files}" ]]; then
   echo "no C++ sources found"

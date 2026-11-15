@@ -74,15 +74,26 @@ Result<DecodedSignal> SignalCodec::decode_bits(SignalId id,
   double value = raw_value * meta.can.scale + meta.can.offset;
   SignalQuality quality = SignalQuality::kOk;
   bool clamped = false;
-  if (value < meta.min) {
+  if (std::isnan(value)) {
+    // NaN cannot be ordered against a range; fail safe to the minimum and mark
+    // the sample invalid so it is never mistaken for a current measurement.
     value = meta.min;
     clamped = true;
+    quality = SignalQuality::kInvalid;
+  } else if (!std::isfinite(value)) {
+    value = value > 0.0 ? meta.max : meta.min;
+    clamped = true;
+    quality = SignalQuality::kClamped;
+  } else if (value < meta.min) {
+    value = meta.min;
+    clamped = true;
+    quality = SignalQuality::kClamped;
   } else if (value > meta.max) {
     value = meta.max;
     clamped = true;
+    quality = SignalQuality::kClamped;
   }
   if (clamped) {
-    quality = SignalQuality::kClamped;
     log_warn(
         "signals", "signal_out_of_range",
         {Field("signal", meta.name), Field("raw_value", raw_value),

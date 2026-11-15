@@ -19,8 +19,9 @@ check() {
 
 step "1/6 format"
 if command -v clang-format >/dev/null 2>&1; then
-  files=$(find include src tests tools idl generated fuzz bench -type f \
-    \( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' -o -name '*.cc' \) 2>/dev/null || true)
+  files=$(find include src tests fuzz bench -type f \
+    \( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' -o -name '*.cc' \) \
+    -not -path '*/generated/*' 2>/dev/null || true)
   if [[ -n "${files}" ]]; then
     check "clang-format --dry-run --Werror" bash -c "clang-format --dry-run --Werror ${files//$'\n'/ }"
   fi

@@ -1,0 +1,15 @@
+{
+  "cases_total": 286,
+  "expected_rejected": 125,
+  "expected_valid": 161,
+  "generator": "tools/gen_tests.py",
+  "llm_accepted": 0,
+  "llm_cases": 0,
+  "llm_proposed": 0,
+  "llm_rejected": 0,
+  "llm_status": "disabled",
+  "schema_cases": 286,
+  "schema_sha256": "b508e9f5f0fb3c0930b30cbc444f05d91d0f22d732f660533a81d38829c8daa7",
+  "seed": 20260101,
+  "version": "1.0.0"
+}

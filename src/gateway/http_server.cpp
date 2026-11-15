@@ -106,35 +106,36 @@ HttpServer::~HttpServer() {
 }
 
 Status HttpServer::start() {
-  listen_fd_ = ::socket(AF_INET, SOCK_STREAM, 0);
-  if (listen_fd_ < 0) {
+  const int fd = ::socket(AF_INET, SOCK_STREAM, 0);
+  listen_fd_.store(fd);
+  if (fd < 0) {
     return make_error(ErrorCode::kIo, std::string("socket: ") + std::strerror(errno));
   }
   int reuse = 1;
-  ::setsockopt(listen_fd_, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+  ::setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
   sockaddr_in address{};
   address.sin_family = AF_INET;
   address.sin_port = htons(port_);
   if (::inet_pton(AF_INET, host_.c_str(), &address.sin_addr) != 1) {
-    ::close(listen_fd_);
-    listen_fd_ = -1;
+    ::close(fd);
+    listen_fd_.store(-1);
     return make_error(ErrorCode::kInvalidArgument, "invalid bind address " + host_);
   }
-  if (::bind(listen_fd_, reinterpret_cast<sockaddr*>(&address), sizeof(address)) != 0) {
+  if (::bind(fd, reinterpret_cast<sockaddr*>(&address), sizeof(address)) != 0) {
     const std::string message = std::string("bind: ") + std::strerror(errno);
-    ::close(listen_fd_);
-    listen_fd_ = -1;
+    ::close(fd);
+    listen_fd_.store(-1);
     return make_error(ErrorCode::kIo, message);
   }
-  if (::listen(listen_fd_, 32) != 0) {
+  if (::listen(fd, 32) != 0) {
     const std::string message = std::string("listen: ") + std::strerror(errno);
-    ::close(listen_fd_);
-    listen_fd_ = -1;
+    ::close(fd);
+    listen_fd_.store(-1);
     return make_error(ErrorCode::kIo, message);
   }
   sockaddr_in bound{};
   socklen_t length = sizeof(bound);
-  if (::getsockname(listen_fd_, reinterpret_cast<sockaddr*>(&bound), &length) == 0) {
+  if (::getsockname(fd, reinterpret_cast<sockaddr*>(&bound), &length) == 0) {
     bound_port_ = ntohs(bound.sin_port);
   } else {
     bound_port_ = port_;
@@ -150,7 +151,8 @@ void HttpServer::accept_loop() {
   while (running_.load()) {
     sockaddr_in peer{};
     socklen_t length = sizeof(peer);
-    const int fd = ::accept(listen_fd_, reinterpret_cast<sockaddr*>(&peer), &length);
+    const int fd =
+        ::accept(listen_fd_.load(), reinterpret_cast<sockaddr*>(&peer), &length);
     if (fd < 0) {
       if (errno == EINTR)
         continue;
@@ -285,10 +287,10 @@ void HttpServer::stop() {
       accept_thread_.join();
     return;
   }
-  if (listen_fd_ >= 0) {
-    ::shutdown(listen_fd_, SHUT_RDWR);
-    ::close(listen_fd_);
-    listen_fd_ = -1;
+  const int fd = listen_fd_.exchange(-1);
+  if (fd >= 0) {
+    ::shutdown(fd, SHUT_RDWR);
+    ::close(fd);
   }
   if (accept_thread_.joinable())
     accept_thread_.join();

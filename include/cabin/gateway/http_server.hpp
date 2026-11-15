@@ -57,7 +57,7 @@ class HttpServer {
   std::uint16_t port_;
   std::uint16_t bound_port_{0};
   HttpHandler handler_;
-  int listen_fd_{-1};
+  std::atomic<int> listen_fd_{-1};
   std::atomic<bool> running_{false};
   std::atomic<int> active_connections_{0};
   std::thread accept_thread_;

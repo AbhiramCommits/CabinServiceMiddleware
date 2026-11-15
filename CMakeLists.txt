@@ -24,7 +24,8 @@ if(CABIN_ENABLE_SANITIZERS)
   elseif(CABIN_SANITIZER STREQUAL "undefined")
     set(CABIN_SAN_FLAGS -fsanitize=undefined -fno-sanitize-recover=all)
   else()
-    set(CABIN_SAN_FLAGS -fsanitize=address -fno-omit-frame-pointer)
+    set(CABIN_SAN_FLAGS -fsanitize=address,undefined -fno-omit-frame-pointer
+                        -fno-sanitize-recover=all)
   endif()
   add_compile_options(${CABIN_SAN_FLAGS})
   add_link_options(${CABIN_SAN_FLAGS})
@@ -82,4 +83,30 @@ endif()
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/broker)
   add_subdirectory(src)
+endif()
+
+if(CABIN_ENABLE_FUZZ)
+  set(CABIN_FUZZ_SOURCES fuzz/fuzz_frame.cpp fuzz/fuzz_signal_decode.cpp)
+  add_executable(fuzz_frame fuzz/fuzz_frame.cpp)
+  target_link_libraries(fuzz_frame PRIVATE cabin_signals)
+  cabin_set_warnings(fuzz_frame)
+
+  add_executable(fuzz_signal_decode fuzz/fuzz_signal_decode.cpp)
+  target_link_libraries(fuzz_signal_decode PRIVATE cabin_signals)
+  cabin_set_warnings(fuzz_signal_decode)
+
+  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND NOT APPLE)
+    foreach(target fuzz_frame fuzz_signal_decode)
+      target_compile_options(${target} PRIVATE
+        -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer)
+      target_link_options(${target} PRIVATE
+        -fsanitize=fuzzer,address,undefined)
+    endforeach()
+  else()
+    # Apple clang ships without libFuzzer on some toolchains and GCC has no
+    # -fsanitize=fuzzer, so use the deterministic in-process loop instead.
+    foreach(target fuzz_frame fuzz_signal_decode)
+      target_compile_definitions(${target} PRIVATE CABIN_FUZZ_FALLBACK)
+    endforeach()
+  endif()
 endif()

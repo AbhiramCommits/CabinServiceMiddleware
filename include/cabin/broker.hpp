@@ -97,9 +97,9 @@ class Broker {
 
   BrokerConfig config_;
   std::string socket_path_;
-  int listen_fd_{-1};
-  int wake_read_{-1};
-  int wake_write_{-1};
+  std::atomic<int> listen_fd_{-1};
+  std::atomic<int> wake_read_{-1};
+  std::atomic<int> wake_write_{-1};
   std::atomic<bool> running_{false};
   std::atomic<bool> stopping_{false};
   std::atomic<std::size_t> client_count_{0};

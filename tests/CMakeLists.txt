@@ -48,3 +48,24 @@ gtest_discover_tests(test_gateway)
 add_executable(cabin_log_probe log_probe.cpp)
 target_link_libraries(cabin_log_probe PRIVATE cabin_core)
 cabin_set_warnings(cabin_log_probe)
+
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/generated/cases.json)
+  add_executable(test_generated_serdes generated/test_generated_serdes.cpp)
+  target_link_libraries(test_generated_serdes PRIVATE cabin_core cabin_signals
+                                                        GTest::gtest_main)
+  target_include_directories(test_generated_serdes PRIVATE
+                             ${CMAKE_CURRENT_SOURCE_DIR}/generated)
+  target_compile_definitions(test_generated_serdes PRIVATE
+                             CABIN_CASES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/generated/cases.json")
+  cabin_set_warnings(test_generated_serdes)
+  gtest_discover_tests(test_generated_serdes)
+
+  add_executable(test_generated_api generated/test_generated_api.cpp)
+  target_link_libraries(test_generated_api PRIVATE cabin_core GTest::gtest_main)
+  target_include_directories(test_generated_api PRIVATE
+                             ${CMAKE_CURRENT_SOURCE_DIR}/generated)
+  target_compile_definitions(test_generated_api PRIVATE
+                             CABIN_CASES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/generated/cases.json")
+  cabin_set_warnings(test_generated_api)
+  gtest_discover_tests(test_generated_api)
+endif()

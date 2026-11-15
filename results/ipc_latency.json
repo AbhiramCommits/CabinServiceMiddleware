@@ -7,11 +7,11 @@
   "payload_bytes": 64,
   "subscribers": 2,
   "samples": 400000,
-  "p50_us": 673.000,
-  "p95_us": 1342.000,
-  "p99_us": 2982.000,
-  "max_us": 38769.000,
-  "messages_per_sec": 138330.571,
-  "elapsed_us": 1445812.000,
+  "p50_us": 504.000,
+  "p95_us": 677.000,
+  "p99_us": 1307.000,
+  "max_us": 7960.000,
+  "messages_per_sec": 194542.499,
+  "elapsed_us": 1028053.000,
   "dropped": 0
 }

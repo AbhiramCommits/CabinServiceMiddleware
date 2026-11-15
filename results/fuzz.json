@@ -1,0 +1,20 @@
+{
+  "mode": "fallback",
+  "seconds_per_target": 10,
+  "targets": {
+    "fuzz_frame": {
+      "corpus_files": 33,
+      "executions": 200033,
+      "log": "results/fuzz_frame.log",
+      "mode": "fallback",
+      "status": "clean"
+    },
+    "fuzz_signal_decode": {
+      "corpus_files": 36,
+      "executions": 200036,
+      "log": "results/fuzz_signal_decode.log",
+      "mode": "fallback",
+      "status": "clean"
+    }
+  }
+}

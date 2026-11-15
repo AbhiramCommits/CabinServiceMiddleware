@@ -3,9 +3,9 @@
   "build_dir": "build",
   "host": "Abhirams-MacBook-Air.local",
   "iterations": 200,
-  "max_us": 2960,
-  "mean_us": 623.8,
-  "p50_us": 546,
-  "p95_us": 1069,
-  "p99_us": 1571
+  "max_us": 2501,
+  "mean_us": 617.9,
+  "p50_us": 549,
+  "p95_us": 1040,
+  "p99_us": 1331
 }

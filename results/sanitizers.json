@@ -1,0 +1,14 @@
+{
+  "asan_ubsan": {
+    "status": "clean",
+    "build_dir": "build-asan",
+    "platform": "Darwin",
+    "options": "halt_on_error=1,detect_leaks=unsupported"
+  },
+  "tsan": {
+    "status": "clean",
+    "build_dir": "build-tsan",
+    "tests": "Broker|Gateway|Personalization (50k soak excluded)",
+    "options": "halt_on_error=1"
+  }
+}
