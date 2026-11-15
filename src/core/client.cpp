@@ -298,6 +298,7 @@ Result<Bytes> ServiceClient::call(std::uint16_t service_id, std::uint16_t method
   if (!threads_running_.load()) {
     return make_error(ErrorCode::kUnavailable, "client is not running");
   }
+  ScopedSpan span("client", "rpc_call");
   std::uint32_t seq = next_seq_.fetch_add(1);
   if (seq == 0)
     seq = next_seq_.fetch_add(1);
@@ -559,8 +560,7 @@ void ServiceClient::request_loop() {
                  make_error(ErrorCode::kNotFound, "service not hosted"));
       continue;
     }
-    const TraceId previous = current_trace_id();
-    set_current_trace_id(request.frame.trace_id);
+    ScopedSpan span(service->service_name(), "handle_request", request.frame.trace_id);
     auto result = service->dispatch(request.frame.method_id, request.frame.payload);
     Frame response;
     response.service_id = request.frame.service_id;
@@ -579,7 +579,6 @@ void ServiceClient::request_loop() {
       log_warn("client", "response_send_failed",
                {Field("message", sent.error().message)});
     }
-    set_current_trace_id(previous);
   }
 }
 

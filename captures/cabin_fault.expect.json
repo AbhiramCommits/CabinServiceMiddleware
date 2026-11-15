@@ -1,0 +1,17 @@
+{
+  "symptom": "HVAC setpoint rejected after ignition cycle (non-finite CAN sample)",
+  "expect_symptom_reproduced": false,
+  "expected": {
+    "seat_position_mm": 420,
+    "seat_recline_deg": 18,
+    "hvac_setpoint_c": 22.0,
+    "hvac_fan_level": 4,
+    "cabin_light_level": 80,
+    "cabin_light_color": "NEUTRAL",
+    "door_state": "AJAR",
+    "ignition_state": "ON"
+  },
+  "stale": ["seat_position_mm", "seat_recline_deg"],
+  "requires_warning": "signal_out_of_range",
+  "guard": "hvac_setpoint_c is finite and within 16.0..30.0 after clamping"
+}

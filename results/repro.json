@@ -1,0 +1,85 @@
+{
+  "assertions": [
+    {
+      "actual": 420,
+      "assertion": "seat_position_mm == 420",
+      "ok": true
+    },
+    {
+      "actual": 18,
+      "assertion": "seat_recline_deg == 18",
+      "ok": true
+    },
+    {
+      "actual": 22.0,
+      "assertion": "hvac_setpoint_c == 22.0",
+      "ok": true
+    },
+    {
+      "actual": 4,
+      "assertion": "hvac_fan_level == 4",
+      "ok": true
+    },
+    {
+      "actual": 80,
+      "assertion": "cabin_light_level == 80",
+      "ok": true
+    },
+    {
+      "actual": "NEUTRAL",
+      "assertion": "cabin_light_color == NEUTRAL",
+      "ok": true
+    },
+    {
+      "actual": "AJAR",
+      "assertion": "door_state == AJAR",
+      "ok": true
+    },
+    {
+      "actual": "ON",
+      "assertion": "ignition_state == ON",
+      "ok": true
+    },
+    {
+      "actual": true,
+      "assertion": "seat_position_mm is stale",
+      "ok": true
+    },
+    {
+      "actual": true,
+      "assertion": "seat_recline_deg is stale",
+      "ok": true
+    },
+    {
+      "actual": true,
+      "assertion": "warning signal_out_of_range emitted",
+      "ok": true
+    },
+    {
+      "actual": 22.0,
+      "assertion": "hvac_setpoint_c is finite and within 16.0..30.0 after clamping",
+      "ok": true
+    }
+  ],
+  "capture": "captures/cabin_fault.log",
+  "expected_reproduced": false,
+  "failing_assertion": null,
+  "reproduced": false,
+  "snapshot": {
+    "cabin_light_color": "NEUTRAL",
+    "cabin_light_level": 80,
+    "door_state": "AJAR",
+    "hvac_fan_level": 4,
+    "hvac_setpoint_c": 22.0,
+    "ignition_state": "ON",
+    "seat_position_mm": 420,
+    "seat_recline_deg": 18,
+    "timestamp_us": 1700000002400000
+  },
+  "stale": [
+    "seat_position_mm",
+    "seat_recline_deg"
+  ],
+  "symptom": "HVAC setpoint rejected after ignition cycle (non-finite CAN sample)",
+  "warning_emitted": true
+}

@@ -226,8 +226,7 @@ HttpResponse GatewayApp::handle(const HttpRequest& request) {
     if (parse_trace_id(incoming, &parsed))
       trace = parsed;
   }
-  const TraceId previous = current_trace_id();
-  set_current_trace_id(trace);
+  ScopedSpan span("gateway", "http_request", trace);
   const std::uint64_t started = now_us();
 
   std::string path = request.path;
@@ -320,7 +319,6 @@ HttpResponse GatewayApp::handle(const HttpRequest& request) {
            {Field("method", request.method), Field("path", path),
             Field("status", static_cast<std::int64_t>(response.status)),
             Field("duration_us", static_cast<std::int64_t>(finished - started))});
-  set_current_trace_id(previous);
   response.headers["X-Cabin-Trace-Id"] = trace_id_hex(trace);
   return response;
 }

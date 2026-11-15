@@ -4,6 +4,7 @@
 
 #include "cabin/clock.hpp"
 #include "cabin/log.hpp"
+#include "cabin/trace.hpp"
 #include "cabin_serdes.hpp"
 
 namespace cabin {
@@ -98,6 +99,7 @@ Result<gen::ApplyProfileResponse> PersonalizationService::apply_profile_internal
     return valid.error();
 
   std::lock_guard<std::mutex> lock(apply_mutex_);
+  ScopedSpan span("personalization", "ApplyProfile");
   const std::uint64_t started = clock_();
 
   // Fixed order: seat, HVAC, lighting. The order is part of the observable

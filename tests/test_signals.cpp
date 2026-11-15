@@ -1,10 +1,19 @@
 #include <gtest/gtest.h>
 #include <unistd.h>
 
+#ifdef __linux__
+#include <linux/can.h>
+#include <linux/can/raw.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#endif
+
 #include <atomic>
 #include <chrono>
 #include <cmath>
 #include <condition_variable>
+#include <cstdio>
 #include <filesystem>
 #include <limits>
 #include <memory>
@@ -342,3 +351,37 @@ TEST(Signals, SocketCanSourceIsCompileGuarded) {
   EXPECT_EQ(source.code(), ErrorCode::kUnsupported);
 #endif
 }
+
+#ifdef __linux__
+TEST(Signals, SocketCanReceivesVcanFrame) {
+  auto source = make_can_source("socketcan:vcan0");
+  if (!source) {
+    GTEST_SKIP() << "vcan0 is not configured: " << source.error().message;
+  }
+  const int fd = ::socket(PF_CAN, SOCK_RAW, CAN_RAW);
+  ASSERT_GE(fd, 0);
+  struct ifreq interface{};
+  std::snprintf(interface.ifr_name, sizeof(interface.ifr_name), "vcan0");
+  ASSERT_GE(::ioctl(fd, SIOCGIFINDEX, &interface), 0);
+  sockaddr_can address{};
+  address.can_family = AF_CAN;
+  address.can_ifindex = interface.ifr_ifindex;
+  ASSERT_GE(::bind(fd, reinterpret_cast<sockaddr*>(&address), sizeof(address)), 0);
+
+  struct can_frame raw{};
+  raw.can_id = 0x120;
+  raw.can_dlc = 3;
+  raw.data[0] = 0xA4;
+  raw.data[1] = 0x01;
+  raw.data[2] = 0x12;
+  ASSERT_EQ(::write(fd, &raw, sizeof(raw)), static_cast<ssize_t>(sizeof(raw)));
+  ::close(fd);
+
+  auto frame = source.value()->next(1000);
+  ASSERT_TRUE(frame.ok()) << (frame.ok() ? "" : frame.error().message);
+  ASSERT_TRUE(frame.value().has_value());
+  EXPECT_EQ(frame.value()->id, 0x120u);
+  EXPECT_EQ(frame.value()->dlc, 3);
+  EXPECT_EQ(frame.value()->data[0], 0xA4);
+}
+#endif

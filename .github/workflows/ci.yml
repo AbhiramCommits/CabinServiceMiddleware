@@ -1,0 +1,191 @@
+name: CI
+
+# Gate semantics:
+#   lint              style and static analysis; a warning means "fix the code".
+#   codegen-drift     generated code must equal the generator output, so a
+#                     generated test/case cannot be edited without review.
+#   build-test        GCC and Clang, Debug and Release, full ctest.
+#   sanitizers        ASan+UBSan on the whole suite, TSan on broker/client/gateway.
+#   coverage-thresholds  real bench + real demo latency + real coverage, compared
+#                     against thresholds.json, which records its derivation.
+#   fuzz-smoke        bounded libFuzzer runs over the pinned corpus.
+#   vcan              Linux-only SocketCAN integration on a virtual CAN link.
+#   triage-on-failure only runs after a failure; it turns logs into a markdown
+#                     table in the job summary instead of making a human grep.
+on:
+  push:
+  pull_request:
+
+env:
+  CMAKE_BUILD_PARALLEL_LEVEL: 4
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tooling
+        run: sudo apt-get update && sudo apt-get install -y clang-format clang-tidy
+      - name: Configure for clang-tidy
+        run: cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - name: clang-format --dry-run --Werror
+        run: |
+          set -euo pipefail
+          files=$(git ls-files '*.cpp' '*.hpp' '*.h' | grep -v -e '^generated/' -e '^tests/generated/' || true)
+          clang-format --dry-run --Werror ${files}
+      - name: clang-tidy on src/
+        run: |
+          set -euo pipefail
+          find src -name '*.cpp' -print0 | xargs -0 clang-tidy -p build || {
+            echo "clang-tidy reported findings"; exit 1; }
+
+  codegen-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: IDL output is byte-identical
+        run: python3 tools/idlc.py --check
+      - name: Generated tests and corpus are byte-identical
+        run: python3 tools/gen_tests.py --check
+
+  build-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+        build_type: [Debug, Release]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select compiler
+        run: |
+          if [ "${{ matrix.compiler }}" = "clang" ]; then
+            echo "CC=clang" >> "$GITHUB_ENV"
+            echo "CXX=clang++" >> "$GITHUB_ENV"
+          else
+            echo "CC=gcc" >> "$GITHUB_ENV"
+            echo "CXX=g++" >> "$GITHUB_ENV"
+          fi
+      - name: Configure and build
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          cmake --build build -j "$CMAKE_BUILD_PARALLEL_LEVEL"
+      - name: ctest
+        run: |
+          mkdir -p results
+          set -o pipefail
+          ctest --test-dir build --output-on-failure -j 4 \
+            2>&1 | tee "results/ctest-${{ matrix.compiler }}-${{ matrix.build_type }}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-${{ matrix.compiler }}-${{ matrix.build_type }}
+          path: |
+            results/
+            build/Testing/Temporary/LastTest.log
+
+  sanitizers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang
+        run: sudo apt-get update && sudo apt-get install -y clang
+      - name: ASan+UBSan then TSan
+        env:
+          CC: clang
+          CXX: clang++
+        run: ./scripts/run_sanitizers.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sanitizers
+          path: results/
+
+  coverage-thresholds:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install coverage tooling
+        run: sudo apt-get update && sudo apt-get install -y gcovr curl
+      - name: Build Debug and Release
+        run: ./scripts/build.sh
+      - name: IPC benchmark (Release)
+        run: ./build-release/bench_ipc --messages 200000 --payload-bytes 64 --subscribers 2
+      - name: End-to-end demo + profile-apply p95
+        run: ./scripts/demo.sh
+      - name: Coverage for src/
+        run: ./scripts/run_coverage.sh
+      - name: Threshold gate
+        run: python3 tools/check_thresholds.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-thresholds
+          path: results/
+
+  fuzz-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang
+        run: sudo apt-get update && sudo apt-get install -y clang
+      - name: Bounded libFuzzer smoke
+        env:
+          CC: clang
+          CXX: clang++
+          FUZZ_SECONDS: 10
+        run: ./scripts/run_fuzz_smoke.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fuzz-smoke
+          path: results/
+
+  vcan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create vcan0
+        run: sudo ./scripts/setup_vcan.sh vcan0
+      - name: Build Debug
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build -j "$CMAKE_BUILD_PARALLEL_LEVEL"
+      - name: SocketCAN integration test
+        run: |
+          mkdir -p results
+          ctest --test-dir build -R SocketCan --output-on-failure \
+            2>&1 | tee results/vcan.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vcan
+          path: results/
+
+  triage-on-failure:
+    if: failure()
+    needs: [lint, codegen-drift, build-test, sanitizers, coverage-thresholds, fuzz-smoke, vcan]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Build a triage table from uploaded logs
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          if find artifacts -type f | grep -q .; then
+            find artifacts -type f \( -name '*.log' -o -name '*.txt' -o -name '*.json' \) \
+              -print0 | xargs -0 cat > combined.log
+          else
+            echo "no artifacts were uploaded" > combined.log
+          fi
+          python3 tools/logtool.py triage combined.log | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: triage
+          path: results/triage.json
