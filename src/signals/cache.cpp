@@ -141,23 +141,23 @@ std::string SignalCache::summary(std::uint64_t now_us) const {
   return out.str();
 }
 
-SignalProcessor::SignalProcessor(std::uint64_t max_age_us) : cache_(max_age_us) {}
+SignalProcessor::SignalProcessor(std::uint64_t max_age_us) : cache_(max_age_us) {
+  changed_.reserve(kSignalCount);
+}
 
-std::vector<SignalId> SignalProcessor::process(const CanFrame& frame,
-                                               std::uint64_t timestamp_us) {
-  std::vector<SignalId> changed;
+const std::vector<SignalId>& SignalProcessor::process(const CanFrame& frame,
+                                                      std::uint64_t timestamp_us) {
+  changed_.clear();
   CanFrame stamped = frame;
   if (stamped.timestamp_us == 0)
     stamped.timestamp_us = timestamp_us;
-  auto decoded = codec_.decode(stamped);
-  if (!decoded)
-    return changed;
-  for (const DecodedSignal& signal : decoded.value()) {
-    if (cache_.update(signal.id, signal.value, timestamp_us)) {
-      changed.push_back(signal.id);
+  const std::size_t count = codec_.decode_into(stamped, scratch_.data(), scratch_.size());
+  for (std::size_t index = 0; index < count; ++index) {
+    if (cache_.update(scratch_[index].id, scratch_[index].value, timestamp_us)) {
+      changed_.push_back(scratch_[index].id);
     }
   }
-  return changed;
+  return changed_;
 }
 
 gen::SignalSnapshot SignalProcessor::snapshot() const {

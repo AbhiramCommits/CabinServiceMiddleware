@@ -26,6 +26,8 @@ class SignalCodec {
  public:
   Result<DecodedSignal> decode_bits(SignalId id, std::uint64_t raw_bits) const;
   Result<std::vector<DecodedSignal>> decode(const CanFrame& frame) const;
+  std::size_t decode_into(const CanFrame& frame, DecodedSignal* out,
+                          std::size_t capacity) const;
   Result<CanFrame> encode(SignalId id, double value) const;
   Status encode_into(CanFrame* frame, SignalId id, double value) const;
 

@@ -9,6 +9,32 @@ add_executable(cabind broker/main.cpp)
 target_link_libraries(cabind PRIVATE cabin_ipc)
 cabin_set_warnings(cabind)
 
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/personalization)
+  add_library(cabin_personalization STATIC
+    personalization/profile_store.cpp
+    personalization/personalization_service.cpp
+  )
+  target_link_libraries(cabin_personalization PUBLIC cabin_ipc cabin_core)
+  cabin_set_warnings(cabin_personalization)
+
+  add_executable(personalizationd personalization/main.cpp)
+  target_link_libraries(personalizationd PRIVATE cabin_personalization)
+  cabin_set_warnings(personalizationd)
+endif()
+
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/gateway)
+  add_library(cabin_gateway STATIC
+    gateway/http_server.cpp
+    gateway/gateway.cpp
+  )
+  target_link_libraries(cabin_gateway PUBLIC cabin_ipc cabin_core)
+  cabin_set_warnings(cabin_gateway)
+
+  add_executable(cabin-gateway gateway/main.cpp)
+  target_link_libraries(cabin-gateway PRIVATE cabin_gateway)
+  cabin_set_warnings(cabin-gateway)
+endif()
+
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/signals)
   add_library(cabin_signals STATIC
     signals/can.cpp

@@ -142,6 +142,8 @@ int main(int argc, char** argv) {
   std::signal(SIGTERM, handle_signal);
 
   bool replay_done = false;
+  bool stall_logged = false;
+  std::uint64_t last_frame_wall_us = cabin::now_us();
   while (!g_stop.load()) {
     if (!replay_done) {
       auto frame = source->next(100);
@@ -154,9 +156,20 @@ int main(int argc, char** argv) {
         const auto& value = frame.value().value();
         const std::uint64_t timestamp =
             value.timestamp_us != 0 ? value.timestamp_us : cabin::now_us();
-        const auto changed = processor.process(value, timestamp);
+        last_frame_wall_us = cabin::now_us();
+        stall_logged = false;
+        const auto& changed = processor.process(value, timestamp);
         if (!changed.empty()) {
           publish_snapshot(host, processor.snapshot());
+        }
+        continue;
+      }
+      if (!source->exhausted()) {
+        if (!stall_logged && source->description().rfind("socketcan:", 0) == 0 &&
+            cabin::now_us() - last_frame_wall_us > 5000000) {
+          cabin::log_warn("signald", "signal_watchdog_stall",
+                          {cabin::Field("source", source->description())});
+          stall_logged = true;
         }
         continue;
       }

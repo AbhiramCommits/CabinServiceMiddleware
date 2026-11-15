@@ -58,7 +58,7 @@ class SignalCache {
 class SignalProcessor {
  public:
   explicit SignalProcessor(std::uint64_t max_age_us = 1000000);
-  std::vector<SignalId> process(const CanFrame& frame, std::uint64_t timestamp_us);
+  const std::vector<SignalId>& process(const CanFrame& frame, std::uint64_t timestamp_us);
   gen::SignalSnapshot snapshot() const;
   std::string summary() const;
 
@@ -70,6 +70,8 @@ class SignalProcessor {
  private:
   SignalCodec codec_;
   SignalCache cache_;
+  std::array<DecodedSignal, kSignalCount> scratch_{};
+  std::vector<SignalId> changed_;
 };
 
 } // namespace cabin::signals

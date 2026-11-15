@@ -53,6 +53,7 @@ set(CABIN_CORE_SOURCES
   src/core/trace.cpp
   src/core/frame.cpp
   src/core/runtime.cpp
+  src/core/json.cpp
   generated/cabin_serdes.cpp
   generated/cabin_can_map.cpp
 )

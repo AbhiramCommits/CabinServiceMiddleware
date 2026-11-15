@@ -28,6 +28,7 @@ class ICanSource {
   virtual ~ICanSource() = default;
   virtual Result<std::optional<CanFrame>> next(int timeout_ms) = 0;
   virtual std::string description() const = 0;
+  virtual bool exhausted() const { return false; }
   virtual void close() = 0;
 };
 
@@ -40,6 +41,7 @@ class ReplayCanSource : public ICanSource {
   Result<void> open();
   Result<std::optional<CanFrame>> next(int timeout_ms) override;
   std::string description() const override;
+  bool exhausted() const override { return stream_.eof(); }
   void close() override;
   std::size_t line_number() const { return line_number_; }
 

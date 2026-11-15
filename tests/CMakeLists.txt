@@ -31,6 +31,18 @@ target_compile_definitions(test_signals PRIVATE CABIN_SOURCE_DIR="${CMAKE_SOURCE
 cabin_set_warnings(test_signals)
 gtest_discover_tests(test_signals)
 
+add_executable(test_personalization test_personalization.cpp)
+target_link_libraries(test_personalization PRIVATE cabin_personalization GTest::gtest_main)
+cabin_set_warnings(test_personalization)
+gtest_discover_tests(test_personalization)
+
+add_executable(test_gateway test_gateway.cpp)
+target_link_libraries(test_gateway PRIVATE cabin_gateway cabin_signals
+                                             cabin_personalization GTest::gtest_main)
+target_compile_definitions(test_gateway PRIVATE CABIN_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+cabin_set_warnings(test_gateway)
+gtest_discover_tests(test_gateway)
+
 # Used by scripts/test.sh to prove a real log line parses as JSON with the
 # standard-library Python json module (no C++ JSON parser needed at step 1).
 add_executable(cabin_log_probe log_probe.cpp)

@@ -96,9 +96,10 @@ Result<DecodedSignal> SignalCodec::decode_bits(SignalId id,
   return decoded;
 }
 
-Result<std::vector<DecodedSignal>> SignalCodec::decode(const CanFrame& frame) const {
-  std::vector<DecodedSignal> decoded;
-  for (std::size_t index = 0; index < kSignalCount; ++index) {
+std::size_t SignalCodec::decode_into(const CanFrame& frame, DecodedSignal* out,
+                                     std::size_t capacity) const {
+  std::size_t count = 0;
+  for (std::size_t index = 0; index < kSignalCount && count < capacity; ++index) {
     const auto id = static_cast<SignalId>(index);
     const SignalMeta& meta = signal_meta(id);
     if (meta.can.frame_id != frame.id)
@@ -116,8 +117,19 @@ Result<std::vector<DecodedSignal>> SignalCodec::decode(const CanFrame& frame) co
         extract_bits(frame, meta.can.bit_offset, meta.can.bit_length);
     auto value = decode_bits(id, raw);
     if (!value)
-      return value.error();
-    decoded.push_back(value.value());
+      continue;
+    out[count++] = value.value();
+  }
+  return count;
+}
+
+Result<std::vector<DecodedSignal>> SignalCodec::decode(const CanFrame& frame) const {
+  std::array<DecodedSignal, kSignalCount> buffer{};
+  const std::size_t count = decode_into(frame, buffer.data(), buffer.size());
+  std::vector<DecodedSignal> decoded;
+  decoded.reserve(count);
+  for (std::size_t index = 0; index < count; ++index) {
+    decoded.push_back(buffer[index]);
   }
   return decoded;
 }
