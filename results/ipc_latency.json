@@ -1,0 +1,17 @@
+{
+  "benchmark": "ipc_publish_latency",
+  "host": "Abhirams-MacBook-Air.local",
+  "compiler": "AppleClang 21.0.0.21000401",
+  "build_type": "Release",
+  "messages": 200000,
+  "payload_bytes": 64,
+  "subscribers": 2,
+  "samples": 400000,
+  "p50_us": 673.000,
+  "p95_us": 1342.000,
+  "p99_us": 2982.000,
+  "max_us": 38769.000,
+  "messages_per_sec": 138330.571,
+  "elapsed_us": 1445812.000,
+  "dropped": 0
+}

@@ -57,6 +57,11 @@ struct Frame {
 std::uint32_t crc32(const std::uint8_t* data, std::size_t size);
 std::uint32_t crc32(const Bytes& bytes);
 
+// Error frames carry a numeric ErrorCode followed by a length-prefixed message
+// so clients can preserve the exact failure reason across the broker.
+Bytes encode_error_payload(const Error& error);
+Error decode_error_payload(const Bytes& payload);
+
 // Serializes a frame. The returned buffer contains exactly one frame.
 Result<Bytes> encode_frame(const Frame& frame);
 

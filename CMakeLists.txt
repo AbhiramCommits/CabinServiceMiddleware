@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 option(CABIN_BUILD_TESTS "Build CABIN tests" ON)
 option(CABIN_ENABLE_SANITIZERS "Enable a sanitizer build" OFF)
@@ -51,6 +52,7 @@ set(CABIN_CORE_SOURCES
   src/core/log.cpp
   src/core/trace.cpp
   src/core/frame.cpp
+  src/core/runtime.cpp
   generated/cabin_serdes.cpp
   generated/cabin_can_map.cpp
 )

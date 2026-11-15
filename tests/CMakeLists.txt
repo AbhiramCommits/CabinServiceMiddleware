@@ -20,6 +20,11 @@ target_link_libraries(test_frame PRIVATE cabin_core GTest::gtest_main)
 cabin_set_warnings(test_frame)
 gtest_discover_tests(test_frame)
 
+add_executable(test_broker test_broker.cpp)
+target_link_libraries(test_broker PRIVATE cabin_ipc GTest::gtest_main)
+cabin_set_warnings(test_broker)
+gtest_discover_tests(test_broker)
+
 # Used by scripts/test.sh to prove a real log line parses as JSON with the
 # standard-library Python json module (no C++ JSON parser needed at step 1).
 add_executable(cabin_log_probe log_probe.cpp)

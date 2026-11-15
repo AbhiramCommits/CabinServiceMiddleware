@@ -1,0 +1,38 @@
+[Unit]
+Description=Cabin middleware broker (service discovery + IPC)
+Documentation=file:/usr/share/doc/cabinservicemiddleware/deployment.md
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/cabind --runtime-dir /run/cabin
+Environment=CABIN_RUNTIME_DIR=/run/cabin
+Environment=CABIN_LOG_LEVEL=info
+RuntimeDirectory=cabin
+RuntimeDirectoryMode=0750
+StateDirectory=cabin
+Restart=on-failure
+RestartSec=2s
+TimeoutStopSec=5s
+User=cabin
+Group=cabin
+
+# Hardening. The broker owns exactly one Unix socket and never touches the
+# network or the filesystem outside its runtime/state directories.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+[Install]
+WantedBy=multi-user.target

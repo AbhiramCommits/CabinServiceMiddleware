@@ -1,0 +1,36 @@
+[Unit]
+Description=Cabin REST/HTTP gateway (transcodes HTTP to IDL calls)
+Documentation=file:/usr/share/doc/cabinservicemiddleware/deployment.md
+After=cabind.service cabin-services.service
+Requires=cabind.service
+PartOf=cabin.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/cabin-gateway --runtime-dir /run/cabin --port 8080
+Environment=CABIN_RUNTIME_DIR=/run/cabin
+Environment=CABIN_STATE_DIR=/var/lib/cabin
+Environment=CABIN_LOG_LEVEL=info
+Restart=on-failure
+RestartSec=1s
+User=cabin
+Group=cabin
+
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+ReadWritePaths=/var/lib/cabin
+
+[Install]
+WantedBy=multi-user.target

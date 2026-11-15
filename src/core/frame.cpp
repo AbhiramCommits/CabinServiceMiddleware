@@ -79,6 +79,30 @@ std::uint32_t crc32(const Bytes& bytes) {
   return crc32(bytes.data(), bytes.size());
 }
 
+Bytes encode_error_payload(const Error& error) {
+  Bytes payload;
+  payload.append_u32(static_cast<std::uint32_t>(error.code));
+  payload.append_string(error.message);
+  return payload;
+}
+
+Error decode_error_payload(const Bytes& payload) {
+  Bytes copy = payload;
+  auto code = copy.read_u32();
+  if (!code) {
+    return make_error(ErrorCode::kParse, "malformed error payload");
+  }
+  auto message = copy.read_string();
+  if (!message) {
+    return make_error(ErrorCode::kParse, "malformed error message");
+  }
+  const auto raw = code.value();
+  if (raw > static_cast<std::uint32_t>(ErrorCode::kInternal)) {
+    return make_error(static_cast<ErrorCode>(raw), message.value());
+  }
+  return Error{static_cast<ErrorCode>(raw), message.value()};
+}
+
 Result<Bytes> encode_frame(const Frame& frame) {
   if (frame.payload.size() > kMaxFramePayload) {
     return make_error(ErrorCode::kInvalidArgument, "frame payload exceeds limit");

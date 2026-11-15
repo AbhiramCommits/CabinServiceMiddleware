@@ -12,7 +12,10 @@ fi
 
 ctest --test-dir "${BUILD_DIR}" --output-on-failure -j "${CTEST_JOBS:-4}"
 
-PROBE="${BUILD_DIR}/tests/cabin_log_probe"
+PROBE="${BUILD_DIR}/cabin_log_probe"
+if [[ ! -x "${PROBE}" ]]; then
+  PROBE="${BUILD_DIR}/tests/cabin_log_probe"
+fi
 if [[ -x "${PROBE}" ]]; then
   echo "== validating emitted log line as JSON =="
   CABIN_LOG_LEVEL=info "${PROBE}" 2>&1 >/dev/null | python3 -c '
