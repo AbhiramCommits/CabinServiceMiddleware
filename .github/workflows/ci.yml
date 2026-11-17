@@ -25,7 +25,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install tooling
-        run: sudo apt-get update && sudo apt-get install -y clang-format clang-tidy
+        # clang-format is pinned from PyPI: Ubuntu's clang-format 18 formats
+        # brace-initialised structs differently from 19+ (what the code uses).
+        run: |
+          sudo apt-get update && sudo apt-get install -y clang-tidy
+          python3 -m pip install --user "clang-format==20.1.8"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Configure for clang-tidy
         run: cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
       - name: clang-format --dry-run --Werror
