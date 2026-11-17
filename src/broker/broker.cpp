@@ -48,6 +48,8 @@ Broker::~Broker() {
   if (thread_.joinable())
     thread_.join();
   cleanup();
+  close_fd(wake_read_);
+  close_fd(wake_write_);
 }
 
 Result<void> Broker::start() {
@@ -82,6 +84,8 @@ Result<void> Broker::start() {
   }
   set_nonblocking(listener);
 
+  close_fd(wake_read_); // left open by a previous run's cleanup()
+  close_fd(wake_write_);
   int wake[2] = {-1, -1};
   if (::pipe(wake) != 0) {
     close_fd(listen_fd_);
@@ -208,8 +212,11 @@ void Broker::cleanup() {
   clients_.clear();
   client_count_.store(0);
   close_fd(listen_fd_);
-  close_fd(wake_read_);
-  close_fd(wake_write_);
+  // The wake pipe is deliberately left open here. cleanup() runs on the broker
+  // thread, while stop()/request_stop() (also called from signal handlers) may
+  // write to wake_write_ concurrently; closing it here raced with that write
+  // and could hit a closed or reused fd. It is closed by ~Broker() after the
+  // thread is joined, or by the next start().
   if (config_.unlink_socket_on_stop && had_listener) {
     ::unlink(socket_path_.c_str());
   }
