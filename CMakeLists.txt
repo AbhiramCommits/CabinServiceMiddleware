@@ -34,6 +34,14 @@ endif()
 if(CABIN_ENABLE_COVERAGE)
   add_compile_options(--coverage -fno-inline -fno-inline-functions)
   add_link_options(--coverage)
+  # The services and broker are multi-threaded; without atomic counter updates
+  # concurrent increments race and gcov reports negative branch counts, which
+  # gcovr rejects ("Got negative hit value").
+  include(CheckCXXCompilerFlag)
+  check_cxx_compiler_flag(-fprofile-update=atomic CABIN_HAS_PROFILE_UPDATE_ATOMIC)
+  if(CABIN_HAS_PROFILE_UPDATE_ATOMIC)
+    add_compile_options(-fprofile-update=atomic)
+  endif()
 endif()
 
 function(cabin_set_warnings target)

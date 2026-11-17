@@ -12,7 +12,10 @@ cmake -S . -B "${BUILD_DIR}" -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DCABIN_ENABLE_FUZZ=ON -DCABIN_BUILD_TESTS=OFF >/dev/null
 cmake --build "${BUILD_DIR}" -j "${JOBS:-4}" >/dev/null
 
-compiler_id="$(grep -m1 '^CMAKE_CXX_COMPILER_ID' "${BUILD_DIR}/CMakeCache.txt" | cut -d= -f2- || true)"
+# CMakeCache.txt does not record the compiler id; CMake writes it to
+# CMakeFiles/<version>/CMakeCXXCompiler.cmake.
+compiler_id="$(sed -n 's/^set(CMAKE_CXX_COMPILER_ID "\(.*\)")$/\1/p' \
+  "${BUILD_DIR}"/CMakeFiles/*/CMakeCXXCompiler.cmake 2>/dev/null | head -n1 || true)"
 platform="$(uname -s)"
 mode="fallback"
 if [[ "${platform}" == "Linux" && "${compiler_id}" == *Clang* ]]; then

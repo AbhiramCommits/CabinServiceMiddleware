@@ -13,7 +13,13 @@ cmake --build "${BUILD_DIR}" -j "${JOBS}" >/dev/null
 # Stale .gcda files from a previous build are rejected by gcov ("Invalid
 # .gcda File"); always start from a clean counter set.
 find "${BUILD_DIR}" -name "*.gcda" -delete
-ctest --test-dir "${BUILD_DIR}" --output-on-failure -j "${CTEST_JOBS:-2}" >/dev/null
+if ! ctest --test-dir "${BUILD_DIR}" --output-on-failure -j "${CTEST_JOBS:-2}" \
+    > results/coverage_ctest.log 2>&1; then
+  echo "ctest failed under coverage instrumentation; failing tests:" >&2
+  grep -E "\*\*\*(Failed|Timeout|Exception)|tests failed" results/coverage_ctest.log >&2 || true
+  tail -n 80 results/coverage_ctest.log >&2
+  exit 1
+fi
 
 GCOVR_GCOV=()
 if [[ "$(uname -s)" == "Darwin" ]] && command -v llvm-cov >/dev/null 2>&1; then
